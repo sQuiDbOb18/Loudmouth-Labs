@@ -7,6 +7,7 @@ import {
   INTERVIEW_TIME_WARNING_PROMPT,
   INTERVIEW_TIME_WARNING_RATIO,
 } from './interviewConfig.js';
+import { apiUrl } from './api.js';
 
 const SYSTEM_PROMPT = `You are conducting a first-round screening interview for a software engineering role. Your job:
 
@@ -232,7 +233,7 @@ export function useVoiceAgent() {
     });
     let parsed;
     try { parsed = typeof call.arguments === 'string' ? JSON.parse(call.arguments) : call.arguments; } catch { throw new Error('The assessment returned invalid JSON.'); }
-    const response = await fetch('/api/assessment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed) });
+    const response = await fetch(apiUrl('/api/assessment'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed) });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error || 'Could not save the assessment.');
     toolCalledRef.current = true;
@@ -332,7 +333,7 @@ export function useVoiceAgent() {
   const connect = useCallback(async (resume = false) => {
     setStatus('connecting'); setError(''); intentionalCloseRef.current = false;
     sessionReadyRef.current = false;
-    const tokenResponse = await fetch('/api/aai-token');
+    const tokenResponse = await fetch(apiUrl('/api/aai-token'));
     const tokenBody = await tokenResponse.json();
     if (!tokenResponse.ok) throw new Error(tokenBody.error || 'Could not get an AssemblyAI token.');
     if (DEBUG_AUDIO) console.info('[audio] fresh AssemblyAI token fetched for new WebSocket');
